@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class LoginPage extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: LoginForm(),
-    );
+        body: Stack(
+      children: [
+        Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage("lib/assets/images/Login_BG.jpg"),
+                  fit: BoxFit.cover),
+            ),
+            child: LoginForm()),
+      ],
+    ));
   }
 }
 
@@ -22,6 +31,7 @@ class LoginFormState extends State<LoginForm> {
   Widget build(BuildContext context) {
     const usernameLabel = 'Username:';
     const passwordLabel = 'Password:';
+    const userBoxLabel = "Welcome there!!";
 
     return Center(
       child: Column(
@@ -31,6 +41,24 @@ class LoginFormState extends State<LoginForm> {
             key: _formKey,
             child: Column(
               children: <Widget>[
+                Container(
+                  margin: const EdgeInsets.only(bottom: 30.0),
+                  child: const Column(
+                    children: [
+                      Icon(
+                        Icons.account_circle_rounded,
+                        size: 90.0,
+                      ),
+                      Text(
+                        userBoxLabel,
+                        style: TextStyle(
+                            fontFamily: "RobotoSlab",
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14.0),
+                      )
+                    ],
+                  ),
+                ),
                 const CustomLoginInput(labelText: usernameLabel),
                 const SizedBox(
                   height: 30,
@@ -39,20 +67,21 @@ class LoginFormState extends State<LoginForm> {
                 const SizedBox(
                   height: 30,
                 ),
-                SizedBox( 
+                Container(
+                  margin: const EdgeInsets.only(top: 30.0),
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Login...')));
-                            //Add database login
+                        //Add database login
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        minimumSize: const Size(250, 50),
-                        shadowColor: const Color.fromARGB(255, 56, 56, 56),
-                        ),
+                      backgroundColor: Theme.of(context).primaryColor,
+                      minimumSize: const Size(250, 50),
+                      shadowColor: const Color.fromARGB(255, 56, 56, 56),
+                    ),
                     child: const Text(
                       'Login',
                       style: TextStyle(
@@ -77,7 +106,6 @@ class CustomLoginInput extends StatefulWidget {
   final String labelText;
   final String? Function(String?)? validator;
 
-
   const CustomLoginInput({
     super.key,
     required this.labelText,
@@ -89,7 +117,6 @@ class CustomLoginInput extends StatefulWidget {
 }
 
 class _CustomLoginInputState extends State<CustomLoginInput> {
-
   bool isObscured = true;
 
   @override
@@ -119,7 +146,12 @@ class _CustomLoginInputState extends State<CustomLoginInput> {
           ),
           decoration: InputDecoration(
             labelText: labelText,
-            hintText: "Introduzca su usuario..."
+            labelStyle: const TextStyle(
+                fontSize: 16.0,
+                fontFamily: "RobotoSlab",
+                fontWeight: FontWeight.w200),
+            hintText: "Introduzca su usuario...",
+            hintStyle: const TextStyle(height: 3.0),
           ),
         ),
       );
@@ -145,11 +177,19 @@ class _CustomLoginInputState extends State<CustomLoginInput> {
           ),
           decoration: InputDecoration(
             labelText: labelText,
+            labelStyle: const TextStyle(
+                fontSize: 16.0,
+                fontFamily: "RobotoSlab",
+                fontWeight: FontWeight.w200),
             hintText: "Introduzca su contraseña...",
+            hintStyle: const TextStyle(height: 3.0),
             suffixIcon: IconButton(
-            icon: Icon(
-              isObscured ? Icons.visibility : Icons.visibility_off,
-            ),
+              icon: Container(
+                margin: const EdgeInsets.only(top: 22.0),
+                child: Icon(
+                  isObscured ? Icons.visibility : Icons.visibility_off,
+                ),
+              ),
               onPressed: () {
                 setState(() {
                   isObscured = !isObscured;

@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cupertino_icons: ^1.0.6
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:
@@ -23,6 +23,7 @@ flutter:
 
   assets:
     - lib/assets/images/LoginRegisterMainPageBackground.jpg
+    - lib/assets/images/Login_BG.jpg
 
   fonts:
     - family: RobotoSlab

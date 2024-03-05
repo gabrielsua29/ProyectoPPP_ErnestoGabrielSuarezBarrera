@@ -3,6 +3,8 @@ import 'package:ecommerce_app/widgets/RegisterPage.dart';
 import 'package:flutter/material.dart';
 
 class LoginRegisterMainPage extends StatelessWidget {
+  const LoginRegisterMainPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

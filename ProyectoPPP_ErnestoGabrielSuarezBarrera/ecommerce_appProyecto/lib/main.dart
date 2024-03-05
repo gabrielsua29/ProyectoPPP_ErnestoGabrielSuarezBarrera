@@ -14,11 +14,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'E-Commerce App',
       theme: ThemeData(
-        colorScheme:
-            ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 75, 164, 205)),
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromARGB(255, 75, 164, 205)),
         useMaterial3: true,
       ),
-      home: LoginRegisterMainPage(),
+      home: const LoginRegisterMainPage(),
     );
   }
 }
