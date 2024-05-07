@@ -64,19 +64,19 @@ class RegisterFormState extends State<RegisterForm> {
                                 fontSize: 14.0),
                           ),
                         ),
-                        CustomRegisterInput(labelText: usernameLabel),
+                        const CustomRegisterInput(labelText: usernameLabel),
                         const SizedBox(
                           height: 30,
                         ),
-                        CustomRegisterInput(labelText: emailLabel),
+                        const CustomRegisterInput(labelText: emailLabel),
                         const SizedBox(
                           height: 30,
                         ),
-                        CustomRegisterInput(labelText: bornLabel),
+                        const CustomRegisterInput(labelText: bornLabel),
                         const SizedBox(
                           height: 30,
                         ),
-                        CustomRegisterInput(labelText: passwordLabel),
+                        const CustomRegisterInput(labelText: passwordLabel),
                         const SizedBox(
                           height: 30,
                         ),
@@ -124,7 +124,7 @@ class CustomRegisterInput extends StatefulWidget {
   final String labelText;
   final String? Function(String?)? validator;
 
-  CustomRegisterInput({
+  const CustomRegisterInput({
     super.key,
     required this.labelText,
     this.validator,

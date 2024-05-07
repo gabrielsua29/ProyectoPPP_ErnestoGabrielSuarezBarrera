@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:ecommerce_app/widgets/MainShop.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -75,6 +76,12 @@ class LoginFormState extends State<LoginForm> {
                         ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Login...')));
                         //Add database login
+                        Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        MainShop()), // Navigator.push para cambiar de widget
+              );
                       }
                     },
                     style: ElevatedButton.styleFrom(
