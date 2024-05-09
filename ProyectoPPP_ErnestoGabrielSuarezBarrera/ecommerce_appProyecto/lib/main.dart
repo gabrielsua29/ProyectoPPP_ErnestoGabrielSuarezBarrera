@@ -1,6 +1,8 @@
 import 'package:ecommerce_app/widgets/LoginRegisterMainPage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'dart:convert';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +28,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', 'US'), // English
+        Locale('es', 'ES'), // Spanish
+      ],
+      locale: const Locale('es', 'ES'), // Default to Spanish
       title: 'E-Commerce App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(

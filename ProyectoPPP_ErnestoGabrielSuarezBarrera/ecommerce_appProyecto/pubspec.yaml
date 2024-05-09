@@ -10,13 +10,17 @@ dependencies:
   flutter:
     sdk: flutter
 
-  intl: ^0.19.0
+  intl: any
 
   http: ^1.2.1
 
   provider: ^6.1.2
 
   firebase_core:
+
+  cloud_firestore:
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -30,6 +34,8 @@ flutter:
   assets:
     - lib/assets/images/LoginRegisterMainPageBackground.jpg
     - lib/assets/images/Login_BG.jpg
+    - lib/assets/i18n/locale/es.json
+    - lib/assets/i18n/locale/en.json
 
   fonts:
     - family: RobotoSlab

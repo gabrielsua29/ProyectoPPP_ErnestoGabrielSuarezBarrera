@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+String usernameController = "";
+String emailController = "";
+String birthdateController = "";
+String passwordController = "";
 
 class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return (Scaffold(
+    return Scaffold(
       body: Stack(
         children: [
           Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage("lib/assets/images/Login_BG.jpg"),
-                    fit: BoxFit.cover),
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("lib/assets/images/Login_BG.jpg"),
+                fit: BoxFit.cover,
               ),
-              child: RegisterForm()),
+            ),
+            child: RegisterForm(),
+          ),
         ],
       ),
-    ));
+    );
   }
 }
 
@@ -29,6 +36,183 @@ class RegisterForm extends StatefulWidget {
 class RegisterFormState extends State<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
 
+  void showEmailExistsError(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.error,
+                      color: Colors.red,
+                      size: 24,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      "Error",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Text(
+                  "The email provided is already registered.",
+                  style: TextStyle(fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("OK"),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showAgeRestrictionError(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.error,
+                      color: Colors.red,
+                      size: 24,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      "Error",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Text(
+                  "You must be at least 18 years old to register.",
+                  style: TextStyle(fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("OK"),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void registerUser({
+    required String username,
+    required String email,
+    required String birthDate,
+    required String password,
+  }) async {
+    try {
+      // Check if the email already exists
+      final existingUsers = await FirebaseFirestore.instance
+          .collection('Usuarios')
+          .where('email', isEqualTo: email)
+          .get();
+
+      if (existingUsers.docs.isNotEmpty) {
+        // If the email already exists, show an error message
+        showEmailExistsError(context);
+        return; // Exit the method without registering the user
+      }
+
+      // Parse the birthdate string to a DateTime object
+      DateTime parsedBirthDate = DateFormat('dd/MM/yyyy').parse(birthDate);
+
+      // Calculate the user's age
+      DateTime now = DateTime.now();
+      int age = now.year - parsedBirthDate.year;
+      if (now.month < parsedBirthDate.month ||
+          (now.month == parsedBirthDate.month &&
+              now.day < parsedBirthDate.day)) {
+        age--;
+      }
+
+      // Check if the user is at least 18 years old
+      if (age < 18) {
+        // Show an error message
+        showAgeRestrictionError(context);
+        return; // Exit the method without registering the user
+      }
+
+      // If the email doesn't exist and the user is at least 18 years old,
+      // proceed with user registration
+      await FirebaseFirestore.instance.collection('Usuarios').add({
+        'username': username,
+        'email': email,
+        'birthDate': birthDate,
+        'password': password,
+      });
+
+      // Show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('User registered successfully!'),
+        ),
+      );
+    } catch (error) {
+      // Show an error message if something goes wrong
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to register user: $error'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     const usernameLabel = 'Username:';
@@ -37,12 +221,12 @@ class RegisterFormState extends State<RegisterForm> {
     const bornLabel = 'Fecha de nacimiento:';
     const userBoxLabel = 'Nuevo usuario';
 
-    return (Center(
+    return Center(
       child: SingleChildScrollView(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Form(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Form(
               key: _formKey,
               child: Column(
                 children: <Widget>[
@@ -59,12 +243,13 @@ class RegisterFormState extends State<RegisterForm> {
                           child: const Text(
                             userBoxLabel,
                             style: TextStyle(
-                                fontFamily: "RobotoSlab",
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14.0),
+                              fontFamily: "RobotoSlab",
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14.0,
+                            ),
                           ),
                         ),
-                        const CustomRegisterInput(labelText: usernameLabel),
+                        CustomRegisterInput(labelText: usernameLabel),
                         const SizedBox(
                           height: 30,
                         ),
@@ -87,10 +272,17 @@ class RegisterFormState extends State<RegisterForm> {
                               if (_formKey.currentState != null &&
                                   _formKey.currentState!.validate()) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content:
-                                            Text('Wait a few seconds...')));
-                                //Add database login
+                                  const SnackBar(
+                                    content: Text('Wait a few seconds...'),
+                                  ),
+                                );
+                                // Add database register
+                                registerUser(
+                                  username: usernameController,
+                                  email: emailController,
+                                  birthDate: birthdateController,
+                                  password: passwordController,
+                                );
                               }
                             },
                             style: ElevatedButton.styleFrom(
@@ -113,10 +305,12 @@ class RegisterFormState extends State<RegisterForm> {
                     ),
                   )
                 ],
-              ))
-        ],
-      )),
-    ));
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -125,7 +319,7 @@ class CustomRegisterInput extends StatefulWidget {
   final String? Function(String?)? validator;
 
   const CustomRegisterInput({
-    super.key,
+    Key? key,
     required this.labelText,
     this.validator,
   });
@@ -136,7 +330,6 @@ class CustomRegisterInput extends StatefulWidget {
 
 class CustomRegisterInputState extends State<CustomRegisterInput> {
   bool isObscured = true;
-  DateTime? selectedDate;
   TextEditingController dateCtl = TextEditingController();
 
   @override
@@ -164,6 +357,9 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
               return null;
             }
           },
+          onChanged: (value) {
+            usernameController = value;
+          },
           style: const TextStyle(
             fontSize: 16,
             fontFamily: 'RobotoSlab',
@@ -172,9 +368,10 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
           decoration: InputDecoration(
             labelText: labelText,
             labelStyle: const TextStyle(
-                fontSize: 16.0,
-                fontFamily: 'RobotoSlab',
-                fontWeight: FontWeight.w200),
+              fontSize: 16.0,
+              fontFamily: 'RobotoSlab',
+              fontWeight: FontWeight.w200,
+            ),
             hintText: 'Introduzca su usuario...',
             hintStyle: const TextStyle(height: 3.0),
           ),
@@ -190,9 +387,15 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
             } else {
               if (value == null || value.isEmpty) {
                 return 'This field cannot be empty.';
+              } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                  .hasMatch(value)) {
+                return 'Please enter a valid email address';
               }
               return null;
             }
+          },
+          onChanged: (value) {
+            emailController = value;
           },
           style: const TextStyle(
             fontSize: 16,
@@ -202,9 +405,10 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
           decoration: InputDecoration(
             labelText: labelText,
             labelStyle: const TextStyle(
-                fontSize: 16.0,
-                fontFamily: 'RobotoSlab',
-                fontWeight: FontWeight.w200),
+              fontSize: 16.0,
+              fontFamily: 'RobotoSlab',
+              fontWeight: FontWeight.w200,
+            ),
             hintText: 'Introduzca su email...',
             hintStyle: const TextStyle(height: 3.0),
           ),
@@ -212,51 +416,59 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
       );
     } else if (labelText == 'Fecha de nacimiento:') {
       return SizedBox(
-          width: 300,
-          child: TextFormField(
-            validator: (value) {
-              if (validator != null) {
-                return validator(value);
-              } else {
-                if (value == null || value.isEmpty) {
-                  return 'This field cannot be empty.';
-                }
-                return null;
+        width: 300,
+        child: TextFormField(
+          validator: (value) {
+            if (validator != null) {
+              return validator(value);
+            } else {
+              if (value == null || value.isEmpty) {
+                return 'This field cannot be empty.';
               }
-            },
-            controller: dateCtl,
-            decoration: InputDecoration(
-                labelText: 'Fecha de nacimiento:',
-                labelStyle: const TextStyle(
-                    fontSize: 16.0,
-                    fontFamily: "RobotoSlab",
-                    fontWeight: FontWeight.w200),
-                hintText: '',
-                hintStyle: const TextStyle(height: 3.0),
-                suffixIcon: Container(
-                    margin: const EdgeInsets.only(top: 32.0),
-                    child: const Icon(Icons.calendar_month))),
+              return null;
+            }
+          },
+          controller: dateCtl,
+          decoration: InputDecoration(
+            labelText: 'Fecha de nacimiento:',
+            labelStyle: const TextStyle(
+              fontSize: 16.0,
+              fontFamily: "RobotoSlab",
+              fontWeight: FontWeight.w200,
+            ),
+            hintText: '',
+            hintStyle: const TextStyle(height: 3.0),
+            suffixIcon: Container(
+              margin: const EdgeInsets.only(top: 32.0),
+              child: const Icon(Icons.calendar_month),
+            ),
+          ),
 
-            // Cuando el usuario toca el TextFormField se abre un DatePicker
-            onTap: () async {
-              DateTime? date = DateTime(1900);
-              FocusScope.of(context).requestFocus(new FocusNode());
+          // Cuando el usuario toca el TextFormField se abre un DatePicker
+          onTap: () async {
+            DateTime? date = DateTime(1900);
+            FocusScope.of(context).requestFocus(FocusNode());
 
-              date = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(1900),
-                  lastDate: DateTime.now());
+            date = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+            );
 
-              print('Exiting on tap');
+            print('Exiting on tap');
 
-              if (date != null) {
-                // Formatear fecha y mostrar
-                String formattedDate = DateFormat('dd/MM/yyyy').format(date);
-                dateCtl.text = formattedDate;
-              }
-            },
-          ));
+            if (date != null) {
+              // Format the selected date
+              String formattedDate = DateFormat('dd/MM/yyyy').format(date);
+              // Update the text field with the formatted date
+              dateCtl.text = formattedDate;
+              // Update the birthdate controller with the formatted date
+              birthdateController = formattedDate;
+            }
+          },
+        ),
+      );
     } else {
       return SizedBox(
         width: 300,
@@ -272,6 +484,9 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
               return null;
             }
           },
+          onChanged: (value) {
+            passwordController = value;
+          },
           style: const TextStyle(
             fontSize: 16,
             fontFamily: 'RobotoSlab',
@@ -280,9 +495,10 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
           decoration: InputDecoration(
             labelText: labelText,
             labelStyle: const TextStyle(
-                fontSize: 16.0,
-                fontFamily: "RobotoSlab",
-                fontWeight: FontWeight.w200),
+              fontSize: 16.0,
+              fontFamily: "RobotoSlab",
+              fontWeight: FontWeight.w200,
+            ),
             hintText: "Introduzca su contraseña...",
             hintStyle: const TextStyle(height: 3.0),
             suffixIcon: IconButton(
