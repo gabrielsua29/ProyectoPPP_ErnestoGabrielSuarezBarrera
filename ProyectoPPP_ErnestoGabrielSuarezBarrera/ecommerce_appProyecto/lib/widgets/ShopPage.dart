@@ -19,13 +19,6 @@ class _ShopPageState extends State<ShopPage> {
     'Clothing',
     'Jewelery'
   ];
-  List<Map<String, dynamic>> cartItems = [];
-
-  void addToCart(Map<String, dynamic> product) {
-    setState(() {
-      cartItems.add(product);
-    });
-  }
 
   @override
   void initState() {
@@ -205,10 +198,7 @@ class _ShopPageState extends State<ShopPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProductDetailsPage(
-          product: product,
-          addToCartCallback: addToCart, // Passing the addToCart method
-        ),
+        builder: (context) => ProductDetailsPage(product: product),
       ),
     );
   }
@@ -216,13 +206,10 @@ class _ShopPageState extends State<ShopPage> {
 
 class ProductDetailsPage extends StatelessWidget {
   final Map<String, dynamic> product;
-  final Function(Map<String, dynamic>)
-      addToCartCallback; // Callback function to add item to cart
 
   const ProductDetailsPage({
     Key? key,
     required this.product,
-    required this.addToCartCallback,
   }) : super(key: key);
 
   @override
@@ -272,27 +259,12 @@ class ProductDetailsPage extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(
-                      '\$',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
-                      ),
-                    ),
                     SizedBox(width: 4),
                     Text(
-                      '${product['price'].toStringAsFixed(2).split('.')[0]}',
+                      '\$${product['price'].toStringAsFixed(2)}',
                       style: TextStyle(
-                        fontSize: 23,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
-                      ),
-                    ),
-                    Text(
-                      '.${product['price'].toStringAsFixed(2).split('.')[1]}',
-                      style: TextStyle(
-                        fontSize: 16,
                         color: Colors.green,
                       ),
                     ),
@@ -301,13 +273,138 @@ class ProductDetailsPage extends StatelessWidget {
                 SizedBox(width: 4),
                 ElevatedButton.icon(
                   onPressed: () {
-                    // Call the callback function to add the product to the cart
-                    addToCartCallback(product);
-                    // Close the ProductDetailsPage
-                    Navigator.pop(context);
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        int quantity = 1;
+
+                        return StatefulBuilder(
+                          builder: (context, setState) {
+                            return AlertDialog(
+                              title: Row(
+                                children: [
+                                  Icon(Icons.shopping_cart_outlined),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Confirm Purchase',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '${product['title']}',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Image.network(
+                                    product['image'],
+                                    height: 100,
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Price per item: \$${product['price']}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          if (quantity > 1) {
+                                            setState(() {
+                                              quantity--;
+                                            });
+                                          }
+                                        },
+                                        icon: Icon(Icons.remove),
+                                      ),
+                                      Text(
+                                        quantity.toString(),
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            quantity++;
+                                          });
+                                        },
+                                        icon: Icon(Icons.add),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Total Price: \$${(product['price'] * quantity).toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    //AÑADIR COMPROBACION TARJETA
+                                    // Here you can use `quantity` for the amount
+                                    Navigator.of(context).pop();
+                                  },
+                                  style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                      Colors.blue.withOpacity(0.1),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Confirm',
+                                    style: TextStyle(
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                      Colors.red.withOpacity(0.1),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Cancel',
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    );
                   },
                   icon: Icon(Icons.shopping_cart),
-                  label: Text('Add to Cart'),
+                  label: Text('Buy'),
                 ),
               ],
             ),

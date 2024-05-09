@@ -1,7 +1,21 @@
 import 'package:ecommerce_app/widgets/LoginRegisterMainPage.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey:
+          "AIzaSyBC95bqE7uXrTO2tpXzajLgpbxq-oM0dn8", // paste your api key here
+      appId:
+          "1:653198875001:android:03354c1877d9956a0937a8", //paste your app id here
+      messagingSenderId: "653198875001", //paste your messagingSenderId here
+      projectId: "proyectoflutter-b088e", //paste your project id here
+    ),
+  );
+  bool firebaseInitialized = Firebase.apps.isNotEmpty;
+  print('Firebase initialized: $firebaseInitialized');
   runApp(const MyApp());
 }
 

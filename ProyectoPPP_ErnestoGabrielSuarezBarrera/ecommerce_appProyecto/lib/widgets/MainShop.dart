@@ -36,10 +36,6 @@ class _MainShopState extends State<MainShop> {
             icon: Icon(Icons.shop),
           ),
           BottomNavigationBarItem(
-            label: "Cart",
-            icon: Icon(Icons.shopping_cart),
-          ),
-          BottomNavigationBarItem(
             label: "Profile",
             icon: Icon(Icons.person),
           )
