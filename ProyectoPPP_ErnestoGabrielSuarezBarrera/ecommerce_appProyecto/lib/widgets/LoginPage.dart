@@ -1,6 +1,8 @@
+import 'package:ecommerce_app/widgets/RegisterPage.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommerce_app/widgets/MainShop.dart';
 import 'package:ecommerce_app/assets/i18n/utils/localeConfig.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -30,6 +32,8 @@ class LoginForm extends StatefulWidget {
 
 class LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -78,29 +82,50 @@ class LoginFormState extends State<LoginForm> {
                           ],
                         ),
                       ),
-                      CustomLoginInput(labelText: usernameLabel),
+                      CustomLoginInput(
+                        labelText: usernameLabel,
+                        controller: usernameController,
+                      ),
                       const SizedBox(
                         height: 30,
                       ),
-                      CustomLoginInput(labelText: passwordLabel),
+                      CustomLoginInput(
+                        labelText: passwordLabel,
+                        controller: passwordController,
+                      ),
                       const SizedBox(
                         height: 30,
                       ),
                       Container(
                         margin: const EdgeInsets.only(top: 30.0),
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Login...')),
                               );
-                              // Add database login
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => MainShop(),
-                                ),
-                              );
+
+                              // Authenticate user
+                              bool authenticated = await authenticateUser(
+                                  usernameController.text.trim(),
+                                  passwordController.text.trim());
+                              if (authenticated) {
+                                // Navigate to main shop page if authentication is successful
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MainShop(),
+                                  ),
+                                );
+                              } else {
+                                // Show error message if authentication fails
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Authentication failed.'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              }
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -128,13 +153,47 @@ class LoginFormState extends State<LoginForm> {
       },
     );
   }
+
+  Future<bool> authenticateUser(String username, String password) async {
+    try {
+      // Query Firestore to find a user with the provided email
+      QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+          .instance
+          .collection('Usuarios')
+          .where('username', isEqualTo: username)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        // Retrieve the user data
+        Map<String, dynamic> userData = snapshot.docs.first.data();
+
+        // Compare the passwords
+        if (userData['password'] == password) {
+          // Authentication successful
+          return true;
+        } else {
+          // Incorrect password
+          return false;
+        }
+      } else {
+        // User not found
+        return false;
+      }
+    } catch (e) {
+      // Error occurred during authentication
+      print('Authentication error: $e');
+      return false;
+    }
+  }
 }
 
 class CustomLoginInput extends StatefulWidget {
   final String labelText;
+  final TextEditingController controller;
 
   const CustomLoginInput({
     required this.labelText,
+    required this.controller,
   });
 
   @override
@@ -168,7 +227,11 @@ class _CustomLoginInputState extends State<CustomLoginInput> {
           return SizedBox(
             width: 300,
             child: TextFormField(
-              obscureText: isObscured,
+              controller: widget.controller,
+              obscureText: widget.labelText == 'Password:' ||
+                      widget.labelText == 'Contraseña:'
+                  ? isObscured
+                  : false,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return emptyFields;
@@ -192,13 +255,8 @@ class _CustomLoginInputState extends State<CustomLoginInput> {
                 suffixIcon: widget.labelText == 'Password:' ||
                         widget.labelText == 'Contraseña:'
                     ? IconButton(
-                        icon: Container(
-                          margin: const EdgeInsets.only(top: 22.0),
-                          child: Icon(
-                            isObscured
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                          ),
+                        icon: Icon(
+                          isObscured ? Icons.visibility : Icons.visibility_off,
                         ),
                         onPressed: () {
                           setState(() {
