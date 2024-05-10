@@ -14,5 +14,17 @@
     "emailHint": "Introduzca su email...",
     "birthdateHint": "Introduzca su fecha de nacimiento...",
     "passwordHint": "Introduzca su contraseña...",
-    "emptyFields": "Campo requerido."
+    "emptyFields": "Campo requerido.",
+    "shopMenuLabel": "Tienda",
+    "profileMenuLabel": "Mi Cuenta",
+    "ourProducts": "Nuestros Productos",
+    "productDetails": "Detalles del Producto",
+    "buyButton": "Comprar",
+    "confirmPurchase": "Confirmar Compra",
+    "itemPrice": "Precio por unidad: ",
+    "totalPrice": "Precio total: ",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "description": "Descripción",
+    "category": "Categoría"
 }

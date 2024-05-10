@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:ecommerce_app/assets/i18n/utils/localeConfig.dart';
 
 class ShopPage extends StatefulWidget {
   const ShopPage({Key? key}) : super(key: key);
@@ -32,12 +33,21 @@ class _ShopPageState extends State<ShopPage> {
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: [
-          const Text(
-            "Our Products",
-            style: TextStyle(
-              fontSize: 27,
-              fontWeight: FontWeight.bold,
-            ),
+          FutureBuilder(
+            future: getTranslatedString(context, 'ourProducts'),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Text(
+                  snapshot.data.toString(),
+                  style: TextStyle(
+                    fontSize: 27,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              } else {
+                return CircularProgressIndicator();
+              }
+            },
           ),
           SizedBox(
             height: 40,
@@ -216,7 +226,22 @@ class ProductDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Product Details'),
+        title: FutureBuilder(
+          future: getTranslatedString(context, 'productDetails'),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return Text(
+                snapshot.data.toString(),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            } else {
+              return CircularProgressIndicator();
+            }
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -285,12 +310,22 @@ class ProductDetailsPage extends StatelessWidget {
                                 children: [
                                   Icon(Icons.shopping_cart_outlined),
                                   SizedBox(width: 8),
-                                  Text(
-                                    'Confirm Purchase',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                  FutureBuilder(
+                                    future: getTranslatedString(
+                                        context, 'confirmPurchase'),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return Text(
+                                          snapshot.data.toString(),
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        );
+                                      } else {
+                                        return CircularProgressIndicator();
+                                      }
+                                    },
                                   ),
                                 ],
                               ),
@@ -310,12 +345,23 @@ class ProductDetailsPage extends StatelessWidget {
                                     height: 100,
                                   ),
                                   SizedBox(height: 8),
-                                  Text(
-                                    'Price per item: \$${product['price']}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.green,
-                                    ),
+                                  FutureBuilder(
+                                    future: getTranslatedString(
+                                        context, 'itemPrice'),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return Text(
+                                          snapshot.data.toString() +
+                                              "\$${product['price']}",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.green,
+                                          ),
+                                        );
+                                      } else {
+                                        return CircularProgressIndicator();
+                                      }
+                                    },
                                   ),
                                   SizedBox(height: 8),
                                   Row(
@@ -350,12 +396,23 @@ class ProductDetailsPage extends StatelessWidget {
                                     ],
                                   ),
                                   SizedBox(height: 8),
-                                  Text(
-                                    'Total Price: \$${(product['price'] * quantity).toStringAsFixed(2)}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.blue,
-                                    ),
+                                  FutureBuilder(
+                                    future: getTranslatedString(
+                                        context, 'totalPrice'),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return Text(
+                                          snapshot.data.toString() +
+                                              "\$${(product['price'] * quantity).toStringAsFixed(2)}",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.blue,
+                                          ),
+                                        );
+                                      } else {
+                                        return CircularProgressIndicator();
+                                      }
+                                    },
                                   ),
                                 ],
                               ),
@@ -372,11 +429,22 @@ class ProductDetailsPage extends StatelessWidget {
                                       Colors.blue.withOpacity(0.1),
                                     ),
                                   ),
-                                  child: Text(
-                                    'Confirm',
-                                    style: TextStyle(
-                                      color: Colors.blue,
-                                    ),
+                                  child: FutureBuilder(
+                                    future:
+                                        getTranslatedString(context, 'confirm'),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return Text(
+                                          snapshot.data.toString(),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.blue,
+                                          ),
+                                        );
+                                      } else {
+                                        return CircularProgressIndicator();
+                                      }
+                                    },
                                   ),
                                 ),
                                 TextButton(
@@ -389,11 +457,22 @@ class ProductDetailsPage extends StatelessWidget {
                                       Colors.red.withOpacity(0.1),
                                     ),
                                   ),
-                                  child: Text(
-                                    'Cancel',
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                    ),
+                                  child: FutureBuilder(
+                                    future:
+                                        getTranslatedString(context, 'cancel'),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return Text(
+                                          snapshot.data.toString(),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.red,
+                                          ),
+                                        );
+                                      } else {
+                                        return CircularProgressIndicator();
+                                      }
+                                    },
                                   ),
                                 ),
                               ],
@@ -404,17 +483,37 @@ class ProductDetailsPage extends StatelessWidget {
                     );
                   },
                   icon: Icon(Icons.shopping_cart),
-                  label: Text('Buy'),
+                  label: FutureBuilder(
+                    future: getTranslatedString(context, 'buyButton'),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Text(
+                          snapshot.data.toString(),
+                        );
+                      } else {
+                        return CircularProgressIndicator();
+                      }
+                    },
+                  ),
                 ),
               ],
             ),
             SizedBox(height: 16),
-            Text(
-              'Description:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            FutureBuilder(
+              future: getTranslatedString(context, 'description'),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Text(
+                    snapshot.data.toString(),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  );
+                } else {
+                  return CircularProgressIndicator();
+                }
+              },
             ),
             SizedBox(height: 4),
             Container(
@@ -429,12 +528,21 @@ class ProductDetailsPage extends StatelessWidget {
               ),
             ),
             SizedBox(height: 16),
-            Text(
-              'Category:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            FutureBuilder(
+              future: getTranslatedString(context, 'category'),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Text(
+                    snapshot.data.toString(),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  );
+                } else {
+                  return CircularProgressIndicator();
+                }
+              },
             ),
             SizedBox(height: 4),
             _buildProductCategory(
