@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommerce_app/assets/i18n/utils/localeConfig.dart';
 
 String usernameController = "";
 String emailController = "";
@@ -35,6 +36,24 @@ class RegisterForm extends StatefulWidget {
 
 class RegisterFormState extends State<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
+
+  late Future<String> _usernameLabel;
+  late Future<String> _passwordLabel;
+  late Future<String> _emailLabel;
+  late Future<String> _birthdateLabel;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTranslations();
+  }
+
+  Future<void> _loadTranslations() async {
+    _usernameLabel = getTranslatedString(context, 'usernameLabel');
+    _passwordLabel = getTranslatedString(context, 'passwordLabel');
+    _emailLabel = getTranslatedString(context, 'emailLabel');
+    _birthdateLabel = getTranslatedString(context, 'birthdateLabel');
+  }
 
   void showEmailExistsError(BuildContext context) {
     showDialog(
@@ -215,90 +234,97 @@ class RegisterFormState extends State<RegisterForm> {
 
   @override
   Widget build(BuildContext context) {
-    const usernameLabel = 'Username:';
-    const passwordLabel = 'Password:';
-    const emailLabel = 'Email:';
-    const bornLabel = 'Fecha de nacimiento:';
-    const userBoxLabel = 'Nuevo usuario';
-
     return Center(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Form(
-              key: _formKey,
+      child: FutureBuilder(
+        future: _loadTranslations(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator(); // Or another loading indicator
+          } else {
+            return SingleChildScrollView(
               child: Column(
-                children: <Widget>[
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 30.0),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Form(
+                    key: _formKey,
                     child: Column(
-                      children: [
-                        const Icon(
-                          Icons.account_circle,
-                          size: 90.0,
-                        ),
+                      children: <Widget>[
                         Container(
-                          margin: const EdgeInsets.only(bottom: 20.0, top: 3.0),
-                          child: const Text(
-                            userBoxLabel,
-                            style: TextStyle(
-                              fontFamily: "RobotoSlab",
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14.0,
-                            ),
-                          ),
-                        ),
-                        CustomRegisterInput(labelText: usernameLabel),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        const CustomRegisterInput(labelText: emailLabel),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        const CustomRegisterInput(labelText: bornLabel),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        const CustomRegisterInput(labelText: passwordLabel),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 30.0),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (_formKey.currentState != null &&
-                                  _formKey.currentState!.validate()) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Wait a few seconds...'),
-                                  ),
-                                );
-                                // Add database register
-                                registerUser(
-                                  username: usernameController,
-                                  email: emailController,
-                                  birthDate: birthdateController,
-                                  password: passwordController,
-                                );
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).primaryColor,
-                              minimumSize: const Size(250, 50),
-                              shadowColor:
-                                  const Color.fromARGB(255, 56, 56, 56),
-                            ),
-                            child: const Text(
-                              'Register',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18.0,
-                                letterSpacing: 0.5,
+                          margin: const EdgeInsets.only(bottom: 30.0),
+                          child: Column(
+                            children: [
+                              const Icon(
+                                Icons.account_circle,
+                                size: 90.0,
                               ),
-                            ),
+                              Container(
+                                margin: const EdgeInsets.only(
+                                    bottom: 20.0, top: 3.0),
+                                child: const Text(
+                                  'Nuevo usuario',
+                                  style: TextStyle(
+                                    fontFamily: "RobotoSlab",
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14.0,
+                                  ),
+                                ),
+                              ),
+                              CustomRegisterInput(labelText: _usernameLabel),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                              CustomRegisterInput(labelText: _emailLabel),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                              CustomRegisterInput(labelText: _birthdateLabel),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                              CustomRegisterInput(labelText: _passwordLabel),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                              Container(
+                                margin: const EdgeInsets.only(top: 30.0),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    if (_formKey.currentState != null &&
+                                        _formKey.currentState!.validate()) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content:
+                                              Text('Wait a few seconds...'),
+                                        ),
+                                      );
+                                      // Add database register
+                                      registerUser(
+                                        username: usernameController,
+                                        email: emailController,
+                                        birthDate: birthdateController,
+                                        password: passwordController,
+                                      );
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    minimumSize: const Size(250, 50),
+                                    shadowColor:
+                                        const Color.fromARGB(255, 56, 56, 56),
+                                  ),
+                                  child: const Text(
+                                    'Register',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18.0,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
                           ),
                         )
                       ],
@@ -306,23 +332,23 @@ class RegisterFormState extends State<RegisterForm> {
                   )
                 ],
               ),
-            )
-          ],
-        ),
+            );
+          }
+        },
       ),
     );
   }
 }
 
 class CustomRegisterInput extends StatefulWidget {
-  final String labelText;
+  final Future<String> labelText;
   final String? Function(String?)? validator;
 
   const CustomRegisterInput({
     Key? key,
     required this.labelText,
     this.validator,
-  });
+  }) : super(key: key);
 
   @override
   CustomRegisterInputState createState() => CustomRegisterInputState();
@@ -340,87 +366,32 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
 
   @override
   Widget build(BuildContext context) {
-    final String labelText = widget.labelText;
+    final Future<String> labelText = widget.labelText;
     final String? Function(String?)? validator = widget.validator;
 
-    if (labelText == 'Username:') {
+    return FutureBuilder<String>(
+      future: labelText,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        }
+        if (snapshot.hasData) {
+          return _buildInputField(snapshot.data!);
+        } else {
+          return Text('Error loading label');
+        }
+      },
+    );
+  }
+
+  Widget _buildInputField(String labelText) {
+    if (labelText == 'Fecha de nacimiento:') {
       return SizedBox(
         width: 300,
         child: TextFormField(
           validator: (value) {
-            if (validator != null) {
-              return validator(value);
-            } else {
-              if (value == null || value.isEmpty) {
-                return 'This field cannot be empty.';
-              }
-              return null;
-            }
-          },
-          onChanged: (value) {
-            usernameController = value;
-          },
-          style: const TextStyle(
-            fontSize: 16,
-            fontFamily: 'RobotoSlab',
-            fontStyle: FontStyle.italic,
-          ),
-          decoration: InputDecoration(
-            labelText: labelText,
-            labelStyle: const TextStyle(
-              fontSize: 16.0,
-              fontFamily: 'RobotoSlab',
-              fontWeight: FontWeight.w200,
-            ),
-            hintText: 'Introduzca su usuario...',
-            hintStyle: const TextStyle(height: 3.0),
-          ),
-        ),
-      );
-    } else if (labelText == 'Email:') {
-      return SizedBox(
-        width: 300,
-        child: TextFormField(
-          validator: (value) {
-            if (validator != null) {
-              return validator(value);
-            } else {
-              if (value == null || value.isEmpty) {
-                return 'This field cannot be empty.';
-              } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                  .hasMatch(value)) {
-                return 'Please enter a valid email address';
-              }
-              return null;
-            }
-          },
-          onChanged: (value) {
-            emailController = value;
-          },
-          style: const TextStyle(
-            fontSize: 16,
-            fontFamily: 'RobotoSlab',
-            fontStyle: FontStyle.italic,
-          ),
-          decoration: InputDecoration(
-            labelText: labelText,
-            labelStyle: const TextStyle(
-              fontSize: 16.0,
-              fontFamily: 'RobotoSlab',
-              fontWeight: FontWeight.w200,
-            ),
-            hintText: 'Introduzca su email...',
-            hintStyle: const TextStyle(height: 3.0),
-          ),
-        ),
-      );
-    } else if (labelText == 'Fecha de nacimiento:') {
-      return SizedBox(
-        width: 300,
-        child: TextFormField(
-          validator: (value) {
-            if (validator != null) {
-              return validator(value);
+            if (widget.validator != null) {
+              return widget.validator!(value);
             } else {
               if (value == null || value.isEmpty) {
                 return 'This field cannot be empty.';
@@ -430,7 +401,7 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
           },
           controller: dateCtl,
           decoration: InputDecoration(
-            labelText: 'Fecha de nacimiento:',
+            labelText: labelText,
             labelStyle: const TextStyle(
               fontSize: 16.0,
               fontFamily: "RobotoSlab",
@@ -443,8 +414,6 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
               child: const Icon(Icons.calendar_month),
             ),
           ),
-
-          // Cuando el usuario toca el TextFormField se abre un DatePicker
           onTap: () async {
             DateTime? date = DateTime(1900);
             FocusScope.of(context).requestFocus(FocusNode());
@@ -456,27 +425,22 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
               lastDate: DateTime.now(),
             );
 
-            print('Exiting on tap');
-
             if (date != null) {
-              // Format the selected date
               String formattedDate = DateFormat('dd/MM/yyyy').format(date);
-              // Update the text field with the formatted date
               dateCtl.text = formattedDate;
-              // Update the birthdate controller with the formatted date
               birthdateController = formattedDate;
             }
           },
         ),
       );
-    } else {
+    } else if (labelText == 'Password:' || labelText == "Contraseña:") {
       return SizedBox(
         width: 300,
         child: TextFormField(
           obscureText: isObscured,
           validator: (value) {
-            if (validator != null) {
-              return validator(value);
+            if (widget.validator != null) {
+              return widget.validator!(value);
             } else {
               if (value == null || value.isEmpty) {
                 return 'This field cannot be empty.';
@@ -496,27 +460,65 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
             labelText: labelText,
             labelStyle: const TextStyle(
               fontSize: 16.0,
-              fontFamily: "RobotoSlab",
+              fontFamily: 'RobotoSlab',
               fontWeight: FontWeight.w200,
             ),
-            hintText: "Introduzca su contraseña...",
+            hintText: 'Enter ${labelText.toLowerCase()}...',
             hintStyle: const TextStyle(height: 3.0),
-            suffixIcon: IconButton(
-              icon: Container(
-                margin: const EdgeInsets.only(top: 22.0),
-                child: Icon(
-                  isObscured ? Icons.visibility : Icons.visibility_off,
-                ),
-              ),
-              onPressed: () {
-                setState(() {
-                  isObscured = !isObscured;
-                });
-              },
-            ),
+            suffixIcon: labelText == 'Password:' || labelText == "Contraseña:"
+                ? IconButton(
+                    icon: Container(
+                      margin: const EdgeInsets.only(top: 22.0),
+                      child: Icon(
+                        isObscured ? Icons.visibility : Icons.visibility_off,
+                      ),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        isObscured = !isObscured;
+                      });
+                    },
+                  )
+                : null,
           ),
         ),
       );
+    } else {
+      return SizedBox(
+          width: 300,
+          child: TextFormField(
+              validator: (value) {
+                if (widget.validator != null) {
+                  return widget.validator!(value);
+                } else {
+                  if (value == null || value.isEmpty) {
+                    return 'This field cannot be empty.';
+                  }
+                  return null;
+                }
+              },
+              onChanged: (value) {
+                if (labelText == "Username:" || labelText == "Usuario:") {
+                  usernameController = value;
+                } else if (labelText == "Email:") {
+                  emailController = value;
+                }
+              },
+              style: const TextStyle(
+                fontSize: 16,
+                fontFamily: 'RobotoSlab',
+                fontStyle: FontStyle.italic,
+              ),
+              decoration: InputDecoration(
+                labelText: labelText,
+                labelStyle: const TextStyle(
+                  fontSize: 16.0,
+                  fontFamily: 'RobotoSlab',
+                  fontWeight: FontWeight.w200,
+                ),
+                hintText: 'Enter ${labelText.toLowerCase()}...',
+                hintStyle: const TextStyle(height: 3.0),
+              )));
     }
   }
 }

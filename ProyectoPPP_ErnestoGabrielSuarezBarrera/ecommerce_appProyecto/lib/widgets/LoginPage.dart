@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:ecommerce_app/widgets/MainShop.dart';
+import 'package:ecommerce_app/assets/i18n/utils/localeConfig.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -30,80 +31,102 @@ class LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    const usernameLabel = 'Username:';
-    const passwordLabel = 'Password:';
-    const userBoxLabel = "Welcome there!!";
+    return FutureBuilder<List<String>>(
+      future: Future.wait([
+        getTranslatedString(context, 'welcome'),
+        getTranslatedString(context, 'usernameLabel'),
+        getTranslatedString(context, 'passwordLabel'),
+        getTranslatedString(context, 'login'),
+      ]),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // While waiting for translation, return a loading indicator or placeholder
+          return CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          // If an error occurred during translation, handle it appropriately
+          return Text('Error: ${snapshot.error}');
+        } else {
+          // If translation is successful, use the translated strings
+          var userBoxLabel = snapshot.data![0];
+          var usernameLabel = snapshot.data![1];
+          var passwordLabel = snapshot.data![2];
+          var buttonText = snapshot.data![3];
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Form(
-            key: _formKey,
+          return Center(
             child: Column(
-              children: <Widget>[
-                Container(
-                  margin: const EdgeInsets.only(bottom: 30.0),
-                  child: const Column(
-                    children: [
-                      Icon(
-                        Icons.account_circle_rounded,
-                        size: 90.0,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 30.0),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.account_circle_rounded,
+                              size: 90.0,
+                            ),
+                            Text(
+                              userBoxLabel,
+                              style: TextStyle(
+                                fontFamily: "RobotoSlab",
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14.0,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      Text(
-                        userBoxLabel,
-                        style: TextStyle(
-                            fontFamily: "RobotoSlab",
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14.0),
-                      )
+                      CustomLoginInput(labelText: usernameLabel),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      CustomLoginInput(labelText: passwordLabel),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(top: 30.0),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Login...')),
+                              );
+                              // Add database login
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MainShop(),
+                                ),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            minimumSize: const Size(250, 50),
+                            shadowColor: const Color.fromARGB(255, 56, 56, 56),
+                          ),
+                          child: Text(
+                            snapshot.data![3],
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18.0,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                const CustomLoginInput(labelText: usernameLabel),
-                const SizedBox(
-                  height: 30,
-                ),
-                const CustomLoginInput(labelText: passwordLabel),
-                const SizedBox(
-                  height: 30,
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 30.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Login...')));
-                        //Add database login
-                        Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        MainShop()), // Navigator.push para cambiar de widget
-              );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      minimumSize: const Size(250, 50),
-                      shadowColor: const Color.fromARGB(255, 56, 56, 56),
-                    ),
-                    child: const Text(
-                      'Login',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18.0,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                )
               ],
             ),
-          )
-        ],
-      ),
+          );
+        }
+      },
     );
   }
 }

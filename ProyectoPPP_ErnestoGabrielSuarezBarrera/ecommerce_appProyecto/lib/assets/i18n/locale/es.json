@@ -1,4 +1,13 @@
 {
     "login": "Iniciar Sesión",
-    "register": "Registrarse"
+    "register": "Registrarse",
+    "welcome": "¡Bienvenido!",
+    "usernameLabel": "Usuario:",
+    "passwordLabel": "Contraseña:",
+    "error": "Error",
+    "emailUsed": "El email introducido ya está registrado.",
+    "ageRestriction": "Usted debe ser mayor de 18 años para registrarse.",
+    "emailLabel": "Email:",
+    "birthdateLabel": "Fecha de nacimiento:",
+    "newUser": "Nuevo Usuario"
 }
