@@ -1,3 +1,4 @@
+import 'package:ecommerce_app/model/userData.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommerce_app/widgets/ProfilePage.dart';
 import 'package:ecommerce_app/widgets/ShopPage.dart';

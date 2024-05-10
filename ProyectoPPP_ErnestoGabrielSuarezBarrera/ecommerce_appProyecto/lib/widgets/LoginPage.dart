@@ -1,8 +1,13 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:ecommerce_app/model/userData.dart';
 import 'package:ecommerce_app/widgets/RegisterPage.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommerce_app/widgets/MainShop.dart';
 import 'package:ecommerce_app/assets/i18n/utils/localeConfig.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -167,6 +172,35 @@ class LoginFormState extends State<LoginForm> {
         // Retrieve the user data
         Map<String, dynamic> userData = snapshot.docs.first.data();
 
+        print(userData['username']);
+        print(userData['password']);
+
+        Map<String, dynamic> userDataMap = {
+          'username': userData['username'].toString(),
+          'email': userData['email'].toString(),
+          'birthdate': userData['birthDate'].toString(),
+          'password': userData['password'].toString(),
+          'bankCard': "", // Add other properties as needed
+        };
+
+        String userDataJson = jsonEncode(userDataMap);
+
+        // Get the application's local directory
+        Directory appDocDir = await getApplicationDocumentsDirectory();
+        String appDocPath = appDocDir.path;
+
+        // Create the file path
+        String filePath = path.join(appDocPath, 'user.json');
+
+        // Write the JSON data to a file
+        File jsonFile = File(filePath);
+        await jsonFile.writeAsString(userDataJson);
+
+        // Read the JSON data from the file
+        String jsonData = await jsonFile.readAsString();
+        Map<String, dynamic> readUserData = jsonDecode(jsonData);
+
+        print(readUserData);
         // Compare the passwords
         if (userData['password'] == password) {
           // Authentication successful
