@@ -9,5 +9,10 @@
     "ageRestriction": "Usted debe ser mayor de 18 años para registrarse.",
     "emailLabel": "Email:",
     "birthdateLabel": "Fecha de nacimiento:",
-    "newUser": "Nuevo Usuario"
+    "newUser": "Nuevo Usuario",
+    "usernameHint": "Introduzca su usuario...",
+    "emailHint": "Introduzca su email...",
+    "birthdateHint": "Introduzca su fecha de nacimiento...",
+    "passwordHint": "Introduzca su contraseña...",
+    "emptyFields": "Campo requerido."
 }

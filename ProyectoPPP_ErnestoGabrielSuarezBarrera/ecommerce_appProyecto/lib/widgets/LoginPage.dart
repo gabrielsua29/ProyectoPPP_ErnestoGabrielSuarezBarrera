@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:ecommerce_app/widgets/MainShop.dart';
 import 'package:ecommerce_app/assets/i18n/utils/localeConfig.dart';
 
@@ -7,17 +6,20 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Stack(
-      children: [
-        Container(
+      body: Stack(
+        children: [
+          Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                  image: AssetImage("lib/assets/images/Login_BG.jpg"),
-                  fit: BoxFit.cover),
+                image: AssetImage("lib/assets/images/Login_BG.jpg"),
+                fit: BoxFit.cover,
+              ),
             ),
-            child: LoginForm()),
-      ],
-    ));
+            child: LoginForm(),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -40,13 +42,10 @@ class LoginFormState extends State<LoginForm> {
       ]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          // While waiting for translation, return a loading indicator or placeholder
-          return CircularProgressIndicator();
+          return Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          // If an error occurred during translation, handle it appropriately
           return Text('Error: ${snapshot.error}');
         } else {
-          // If translation is successful, use the translated strings
           var userBoxLabel = snapshot.data![0];
           var usernameLabel = snapshot.data![1];
           var passwordLabel = snapshot.data![2];
@@ -110,7 +109,7 @@ class LoginFormState extends State<LoginForm> {
                             shadowColor: const Color.fromARGB(255, 56, 56, 56),
                           ),
                           child: Text(
-                            snapshot.data![3],
+                            buttonText,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 18.0,
@@ -131,15 +130,11 @@ class LoginFormState extends State<LoginForm> {
   }
 }
 
-// ignore: must_be_immutable
 class CustomLoginInput extends StatefulWidget {
   final String labelText;
-  final String? Function(String?)? validator;
 
   const CustomLoginInput({
-    super.key,
     required this.labelText,
-    this.validator,
   });
 
   @override
@@ -151,84 +146,72 @@ class _CustomLoginInputState extends State<CustomLoginInput> {
 
   @override
   Widget build(BuildContext context) {
-    //Obtaining values from the CustomLoginInput
-    final String labelText = widget.labelText;
-    final String? Function(String?)? validator = widget.validator;
+    var hintTextKey =
+        widget.labelText == 'Username:' || widget.labelText == 'Usuario:'
+            ? 'usernameHint'
+            : 'passwordHint';
 
-    if (labelText == 'Username:') {
-      return SizedBox(
-        width: 300,
-        child: TextFormField(
-          validator: (value) {
-            if (validator != null) {
-              return validator(value);
-            } else {
-              if (value == null || value.isEmpty) {
-                return 'This field cannot be empty.';
-              }
-              return null;
-            }
-          },
-          style: const TextStyle(
-            fontSize: 16,
-            fontFamily: 'RobotoSlab',
-            fontStyle: FontStyle.italic,
-          ),
-          decoration: InputDecoration(
-            labelText: labelText,
-            labelStyle: const TextStyle(
-                fontSize: 16.0,
-                fontFamily: "RobotoSlab",
-                fontWeight: FontWeight.w200),
-            hintText: "Introduzca su usuario...",
-            hintStyle: const TextStyle(height: 3.0),
-          ),
-        ),
-      );
-    } else {
-      return SizedBox(
-        width: 300,
-        child: TextFormField(
-          obscureText: isObscured,
-          validator: (value) {
-            if (validator != null) {
-              return validator(value);
-            } else {
-              if (value == null || value.isEmpty) {
-                return 'This field cannot be empty.';
-              }
-              return null;
-            }
-          },
-          style: const TextStyle(
-            fontSize: 16,
-            fontFamily: 'RobotoSlab',
-            fontStyle: FontStyle.italic,
-          ),
-          decoration: InputDecoration(
-            labelText: labelText,
-            labelStyle: const TextStyle(
-                fontSize: 16.0,
-                fontFamily: "RobotoSlab",
-                fontWeight: FontWeight.w200),
-            hintText: "Introduzca su contraseña...",
-            hintStyle: const TextStyle(height: 3.0),
-            suffixIcon: IconButton(
-              icon: Container(
-                margin: const EdgeInsets.only(top: 22.0),
-                child: Icon(
-                  isObscured ? Icons.visibility : Icons.visibility_off,
-                ),
-              ),
-              onPressed: () {
-                setState(() {
-                  isObscured = !isObscured;
-                });
+    return FutureBuilder<List<String>>(
+      future: Future.wait([
+        getTranslatedString(context, hintTextKey),
+        getTranslatedString(context, 'emptyFields'),
+      ]),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          var hintText = snapshot.data![0];
+          var emptyFields = snapshot.data![1];
+
+          return SizedBox(
+            width: 300,
+            child: TextFormField(
+              obscureText: isObscured,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return emptyFields;
+                }
+                return null;
               },
+              style: const TextStyle(
+                fontSize: 16,
+                fontFamily: 'RobotoSlab',
+                fontStyle: FontStyle.italic,
+              ),
+              decoration: InputDecoration(
+                labelText: widget.labelText,
+                labelStyle: const TextStyle(
+                  fontSize: 16.0,
+                  fontFamily: "RobotoSlab",
+                  fontWeight: FontWeight.w200,
+                ),
+                hintText: hintText,
+                hintStyle: const TextStyle(height: 3.0),
+                suffixIcon: widget.labelText == 'Password:' ||
+                        widget.labelText == 'Contraseña:'
+                    ? IconButton(
+                        icon: Container(
+                          margin: const EdgeInsets.only(top: 22.0),
+                          child: Icon(
+                            isObscured
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            isObscured = !isObscured;
+                          });
+                        },
+                      )
+                    : null,
+              ),
             ),
-          ),
-        ),
-      );
-    }
+          );
+        }
+      },
+    );
   }
 }

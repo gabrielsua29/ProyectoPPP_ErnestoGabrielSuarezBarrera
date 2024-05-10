@@ -37,10 +37,19 @@ class RegisterForm extends StatefulWidget {
 class RegisterFormState extends State<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
 
+  late Future<String> _newUserLabel;
   late Future<String> _usernameLabel;
   late Future<String> _passwordLabel;
   late Future<String> _emailLabel;
   late Future<String> _birthdateLabel;
+  late Future<String> _emailUsed;
+  late Future<String> _ageRestricted;
+  late Future<String> _register;
+  late Future<String> _usernameHint;
+  late Future<String> _emailHint;
+  late Future<String> _birthdateHint;
+  late Future<String> _passwordHint;
+  late Future<String> _emptyFieldError;
 
   @override
   void initState() {
@@ -49,10 +58,19 @@ class RegisterFormState extends State<RegisterForm> {
   }
 
   Future<void> _loadTranslations() async {
+    _newUserLabel = getTranslatedString(context, 'newUser');
     _usernameLabel = getTranslatedString(context, 'usernameLabel');
     _passwordLabel = getTranslatedString(context, 'passwordLabel');
     _emailLabel = getTranslatedString(context, 'emailLabel');
     _birthdateLabel = getTranslatedString(context, 'birthdateLabel');
+    _emailUsed = getTranslatedString(context, 'emailUsed');
+    _ageRestricted = getTranslatedString(context, 'ageRestriction');
+    _register = getTranslatedString(context, 'register');
+    _usernameHint = getTranslatedString(context, 'usernameHint');
+    _emailHint = getTranslatedString(context, 'emailHint');
+    _birthdateHint = getTranslatedString(context, 'birthdateHint');
+    _passwordHint = getTranslatedString(context, 'passwordHint');
+    _emptyFieldError = getTranslatedString(context, 'emptyFieldError');
   }
 
   void showEmailExistsError(BuildContext context) {
@@ -91,11 +109,19 @@ class RegisterFormState extends State<RegisterForm> {
                     ),
                   ],
                 ),
-                SizedBox(height: 16),
-                Text(
-                  "The email provided is already registered.",
-                  style: TextStyle(fontSize: 16),
-                  textAlign: TextAlign.center,
+                FutureBuilder<String>(
+                  future: _emailUsed,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else {
+                      return Text(
+                        snapshot.data ?? '',
+                        style: TextStyle(fontSize: 16),
+                        textAlign: TextAlign.center,
+                      );
+                    }
+                  },
                 ),
                 SizedBox(height: 16),
                 ElevatedButton(
@@ -148,11 +174,19 @@ class RegisterFormState extends State<RegisterForm> {
                     ),
                   ],
                 ),
-                SizedBox(height: 16),
-                Text(
-                  "You must be at least 18 years old to register.",
-                  style: TextStyle(fontSize: 16),
-                  textAlign: TextAlign.center,
+                FutureBuilder<String>(
+                  future: _ageRestricted,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else {
+                      return Text(
+                        snapshot.data ?? '',
+                        style: TextStyle(fontSize: 16),
+                        textAlign: TextAlign.center,
+                      );
+                    }
+                  },
                 ),
                 SizedBox(height: 16),
                 ElevatedButton(
@@ -260,28 +294,50 @@ class RegisterFormState extends State<RegisterForm> {
                               Container(
                                 margin: const EdgeInsets.only(
                                     bottom: 20.0, top: 3.0),
-                                child: const Text(
-                                  'Nuevo usuario',
-                                  style: TextStyle(
-                                    fontFamily: "RobotoSlab",
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 14.0,
-                                  ),
+                                child: FutureBuilder<String>(
+                                  future: _newUserLabel,
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return CircularProgressIndicator();
+                                    } else {
+                                      return Text(
+                                        snapshot.data ?? '',
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontFamily: 'RobotoSlab',
+                                            fontWeight: FontWeight.w500),
+                                        textAlign: TextAlign.center,
+                                      );
+                                    }
+                                  },
                                 ),
                               ),
-                              CustomRegisterInput(labelText: _usernameLabel),
+                              CustomRegisterInput(
+                                  labelText: _usernameLabel,
+                                  hintText: _usernameHint,
+                                  errorText: _emptyFieldError),
                               const SizedBox(
                                 height: 30,
                               ),
-                              CustomRegisterInput(labelText: _emailLabel),
+                              CustomRegisterInput(
+                                  labelText: _emailLabel,
+                                  hintText: _emailHint,
+                                  errorText: _emptyFieldError),
                               const SizedBox(
                                 height: 30,
                               ),
-                              CustomRegisterInput(labelText: _birthdateLabel),
+                              CustomRegisterInput(
+                                  labelText: _birthdateLabel,
+                                  hintText: _birthdateHint,
+                                  errorText: _emptyFieldError),
                               const SizedBox(
                                 height: 30,
                               ),
-                              CustomRegisterInput(labelText: _passwordLabel),
+                              CustomRegisterInput(
+                                  labelText: _passwordLabel,
+                                  hintText: _passwordHint,
+                                  errorText: _emptyFieldError),
                               const SizedBox(
                                 height: 30,
                               ),
@@ -314,13 +370,25 @@ class RegisterFormState extends State<RegisterForm> {
                                     shadowColor:
                                         const Color.fromARGB(255, 56, 56, 56),
                                   ),
-                                  child: const Text(
-                                    'Register',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18.0,
-                                      letterSpacing: 0.5,
-                                    ),
+                                  child: FutureBuilder<String>(
+                                    future: _register,
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return CircularProgressIndicator();
+                                      } else if (snapshot.hasError) {
+                                        return Text('Error: ${snapshot.error}');
+                                      } else {
+                                        return Text(
+                                          snapshot.data ?? 'Register',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18.0,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        );
+                                      }
+                                    },
                                   ),
                                 ),
                               )
@@ -342,11 +410,15 @@ class RegisterFormState extends State<RegisterForm> {
 
 class CustomRegisterInput extends StatefulWidget {
   final Future<String> labelText;
+  final Future<String> hintText;
+  final Future<String> errorText;
   final String? Function(String?)? validator;
 
   const CustomRegisterInput({
     Key? key,
     required this.labelText,
+    required this.hintText,
+    required this.errorText,
     this.validator,
   }) : super(key: key);
 
@@ -366,17 +438,14 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
 
   @override
   Widget build(BuildContext context) {
-    final Future<String> labelText = widget.labelText;
-    final String? Function(String?)? validator = widget.validator;
-
     return FutureBuilder<String>(
-      future: labelText,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+      future: widget.labelText,
+      builder: (context, labelTextSnapshot) {
+        if (labelTextSnapshot.connectionState == ConnectionState.waiting) {
           return CircularProgressIndicator();
         }
-        if (snapshot.hasData) {
-          return _buildInputField(snapshot.data!);
+        if (labelTextSnapshot.hasData) {
+          return _buildInputField(labelTextSnapshot.data!);
         } else {
           return Text('Error loading label');
         }
@@ -385,140 +454,159 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
   }
 
   Widget _buildInputField(String labelText) {
-    if (labelText == 'Fecha de nacimiento:') {
-      return SizedBox(
-        width: 300,
-        child: TextFormField(
-          validator: (value) {
-            if (widget.validator != null) {
-              return widget.validator!(value);
-            } else {
-              if (value == null || value.isEmpty) {
-                return 'This field cannot be empty.';
-              }
-              return null;
-            }
-          },
-          controller: dateCtl,
-          decoration: InputDecoration(
-            labelText: labelText,
-            labelStyle: const TextStyle(
-              fontSize: 16.0,
-              fontFamily: "RobotoSlab",
-              fontWeight: FontWeight.w200,
-            ),
-            hintText: '',
-            hintStyle: const TextStyle(height: 3.0),
-            suffixIcon: Container(
-              margin: const EdgeInsets.only(top: 32.0),
-              child: const Icon(Icons.calendar_month),
-            ),
-          ),
-          onTap: () async {
-            DateTime? date = DateTime(1900);
-            FocusScope.of(context).requestFocus(FocusNode());
-
-            date = await showDatePicker(
-              context: context,
-              initialDate: DateTime.now(),
-              firstDate: DateTime(1900),
-              lastDate: DateTime.now(),
-            );
-
-            if (date != null) {
-              String formattedDate = DateFormat('dd/MM/yyyy').format(date);
-              dateCtl.text = formattedDate;
-              birthdateController = formattedDate;
-            }
-          },
-        ),
-      );
-    } else if (labelText == 'Password:' || labelText == "Contraseña:") {
-      return SizedBox(
-        width: 300,
-        child: TextFormField(
-          obscureText: isObscured,
-          validator: (value) {
-            if (widget.validator != null) {
-              return widget.validator!(value);
-            } else {
-              if (value == null || value.isEmpty) {
-                return 'This field cannot be empty.';
-              }
-              return null;
-            }
-          },
-          onChanged: (value) {
-            passwordController = value;
-          },
-          style: const TextStyle(
-            fontSize: 16,
-            fontFamily: 'RobotoSlab',
-            fontStyle: FontStyle.italic,
-          ),
-          decoration: InputDecoration(
-            labelText: labelText,
-            labelStyle: const TextStyle(
-              fontSize: 16.0,
-              fontFamily: 'RobotoSlab',
-              fontWeight: FontWeight.w200,
-            ),
-            hintText: 'Enter ${labelText.toLowerCase()}...',
-            hintStyle: const TextStyle(height: 3.0),
-            suffixIcon: labelText == 'Password:' || labelText == "Contraseña:"
-                ? IconButton(
-                    icon: Container(
-                      margin: const EdgeInsets.only(top: 22.0),
-                      child: Icon(
-                        isObscured ? Icons.visibility : Icons.visibility_off,
-                      ),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        isObscured = !isObscured;
-                      });
-                    },
-                  )
-                : null,
-          ),
-        ),
-      );
-    } else {
-      return SizedBox(
-          width: 300,
-          child: TextFormField(
-              validator: (value) {
-                if (widget.validator != null) {
-                  return widget.validator!(value);
-                } else {
-                  if (value == null || value.isEmpty) {
-                    return 'This field cannot be empty.';
+    return FutureBuilder<String>(
+      future: widget.hintText,
+      builder: (context, hintTextSnapshot) {
+        if (hintTextSnapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        }
+        if (hintTextSnapshot.hasData) {
+          if (labelText == 'Fecha de nacimiento:' ||
+              labelText == "Birthdate:") {
+            return SizedBox(
+              width: 300,
+              child: TextFormField(
+                validator: (value) {
+                  if (widget.validator != null) {
+                    return widget.validator!(value);
+                  } else {
+                    if (value == null || value.isEmpty) {
+                      return hintTextSnapshot.data!;
+                    }
+                    return null;
                   }
-                  return null;
-                }
-              },
-              onChanged: (value) {
-                if (labelText == "Username:" || labelText == "Usuario:") {
-                  usernameController = value;
-                } else if (labelText == "Email:") {
-                  emailController = value;
-                }
-              },
-              style: const TextStyle(
-                fontSize: 16,
-                fontFamily: 'RobotoSlab',
-                fontStyle: FontStyle.italic,
-              ),
-              decoration: InputDecoration(
-                labelText: labelText,
-                labelStyle: const TextStyle(
-                  fontSize: 16.0,
-                  fontFamily: 'RobotoSlab',
-                  fontWeight: FontWeight.w200,
+                },
+                controller: dateCtl,
+                decoration: InputDecoration(
+                  labelText: labelText,
+                  labelStyle: const TextStyle(
+                    fontSize: 16.0,
+                    fontFamily: "RobotoSlab",
+                    fontWeight: FontWeight.w200,
+                  ),
+                  hintText: hintTextSnapshot.data!,
+                  hintStyle: const TextStyle(height: 3.0),
+                  suffixIcon: Container(
+                    margin: const EdgeInsets.only(top: 32.0),
+                    child: const Icon(Icons.calendar_month),
+                  ),
                 ),
-                hintText: 'Enter ${labelText.toLowerCase()}...',
-                hintStyle: const TextStyle(height: 3.0),
-              )));
-    }
+                onTap: () async {
+                  DateTime? date = DateTime(1900);
+                  FocusScope.of(context).requestFocus(FocusNode());
+
+                  date = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime.now(),
+                  );
+
+                  if (date != null) {
+                    String formattedDate =
+                        DateFormat('dd/MM/yyyy').format(date);
+                    dateCtl.text = formattedDate;
+                    birthdateController = formattedDate;
+                  }
+                },
+              ),
+            );
+          } else if (labelText == 'Password:' || labelText == "Contraseña:") {
+            return SizedBox(
+              width: 300,
+              child: TextFormField(
+                obscureText: isObscured,
+                validator: (value) {
+                  if (widget.validator != null) {
+                    return widget.validator!(value);
+                  } else {
+                    if (value == null || value.isEmpty) {
+                      return hintTextSnapshot.data!;
+                    }
+                    return null;
+                  }
+                },
+                onChanged: (value) {
+                  passwordController = value;
+                },
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'RobotoSlab',
+                  fontStyle: FontStyle.italic,
+                ),
+                decoration: InputDecoration(
+                  labelText: labelText,
+                  labelStyle: const TextStyle(
+                    fontSize: 16.0,
+                    fontFamily: 'RobotoSlab',
+                    fontWeight: FontWeight.w200,
+                  ),
+                  hintText: hintTextSnapshot.data!,
+                  hintStyle: const TextStyle(height: 3.0),
+                  suffixIcon:
+                      labelText == 'Password:' || labelText == "Contraseña:"
+                          ? IconButton(
+                              icon: Container(
+                                margin: const EdgeInsets.only(top: 22.0),
+                                child: Icon(
+                                  isObscured
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                ),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  isObscured = !isObscured;
+                                });
+                              },
+                            )
+                          : null,
+                ),
+              ),
+            );
+          } else {
+            return SizedBox(
+              width: 300,
+              child: TextFormField(
+                validator: (value) {
+                  if (widget.validator != null) {
+                    return widget.validator!(value);
+                  } else {
+                    if (value == null || value.isEmpty) {
+                      return hintTextSnapshot.data!;
+                    }
+                    return null;
+                  }
+                },
+                onChanged: (value) {
+                  if (labelText == "Username:" || labelText == "Usuario:") {
+                    usernameController = value;
+                  } else if (labelText == "Email:") {
+                    emailController = value;
+                  }
+                },
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'RobotoSlab',
+                  fontStyle: FontStyle.italic,
+                ),
+                decoration: InputDecoration(
+                  labelText: labelText,
+                  labelStyle: const TextStyle(
+                    fontSize: 16.0,
+                    fontFamily: 'RobotoSlab',
+                    fontWeight: FontWeight.w200,
+                  ),
+                  hintText: hintTextSnapshot.data!,
+                  hintStyle: const TextStyle(height: 3.0),
+                ),
+              ),
+            );
+          }
+        } else {
+          return Text('Error loading hint');
+        }
+      },
+    );
   }
 }
