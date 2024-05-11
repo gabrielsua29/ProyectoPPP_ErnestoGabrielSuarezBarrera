@@ -99,6 +99,21 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 Positioned(
                   bottom: 16,
+                  left: 16,
+                  child: SizedBox(
+                    width: 120,
+                    height: 40,
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: ElevatedButton(
+                        onPressed: _showResetPasswordDialog,
+                        child: Text('Reset Password'),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 16,
                   right: 16,
                   child: SizedBox(
                     width: 120,
@@ -120,8 +135,108 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildProfileItem(
-      {required String label, required String value, VoidCallback? onTap}) {
+  void _showResetPasswordDialog() {
+    TextEditingController newPasswordController = TextEditingController();
+    bool obscureText = true;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Reset Password'),
+              content: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: newPasswordController,
+                      obscureText: obscureText,
+                      decoration: InputDecoration(
+                        labelText: 'New Password',
+                        suffixIcon: IconButton(
+                          icon: Icon(obscureText
+                              ? Icons.visibility
+                              : Icons.visibility_off),
+                          onPressed: () {
+                            setState(() {
+                              obscureText = !obscureText;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () async {
+                    String newPassword = newPasswordController.text.trim();
+
+                    // Retrieve email from local storage
+                    String? userEmail = userData['email'];
+
+                    if (userEmail != null) {
+                      // Update password in Firestore
+                      await _updatePasswordInFirestore(userEmail, newPassword);
+                    }
+
+                    // Close dialog
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Reset'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Cancel'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _updatePasswordInFirestore(
+      String userEmail, String newPassword) async {
+    try {
+      // Reference to the "Usuarios" collection in Firestore
+      CollectionReference usuarios =
+          FirebaseFirestore.instance.collection('Usuarios');
+
+      // Query for the document where email matches the userEmail
+      QuerySnapshot querySnapshot =
+          await usuarios.where('email', isEqualTo: userEmail).get();
+
+      // If there is a document matching the query, update its password field
+      if (querySnapshot.docs.isNotEmpty) {
+        await querySnapshot.docs.first.reference.update({
+          'password': newPassword,
+        });
+
+        print('Password updated in Firestore successfully!');
+      } else {
+        print('No document found with the email: $userEmail');
+      }
+    } catch (e) {
+      print('Error updating password in Firestore: $e');
+    }
+  }
+
+  Widget _buildProfileItem({
+    required String label,
+    required String value,
+    VoidCallback? onTap,
+  }) {
+    String displayedValue =
+        label == 'Bank Card' ? _obscureCardNumber(value) : value;
+
     return InkWell(
       onTap: onTap,
       child: Column(
@@ -139,7 +254,7 @@ class _ProfilePageState extends State<ProfilePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                value,
+                displayedValue,
                 style: TextStyle(
                   fontSize: 16,
                 ),
@@ -151,6 +266,18 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
     );
+  }
+
+  String _obscureCardNumber(String cardNumber) {
+    if (cardNumber.length <= 4) {
+      return cardNumber; // If the card number has 4 or fewer characters, don't obscure
+    }
+
+    String obscuredPart = '*' *
+        (cardNumber.length - 4); // Obscure all characters except the last four
+    String lastFourDigits =
+        cardNumber.substring(cardNumber.length - 4); // Get the last four digits
+    return '$obscuredPart$lastFourDigits'; // Concatenate the obscured part with the last four digits
   }
 
   void _showCardDialog() {
