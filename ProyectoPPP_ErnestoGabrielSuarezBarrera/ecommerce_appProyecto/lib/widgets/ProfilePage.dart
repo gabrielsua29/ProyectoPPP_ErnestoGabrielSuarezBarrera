@@ -254,8 +254,22 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  void _signOut() {
-    // Clear any user session data or authentication tokens
+  void _signOut() async {
+    try {
+      // Clear any user session data or authentication tokens
+
+      // Delete the user.json file
+      Directory appDocDir = await getApplicationDocumentsDirectory();
+      String appDocPath = appDocDir.path;
+      String filePath = '$appDocPath/user.json';
+      File file = File(filePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      print('Error signing out: $e');
+    }
+
     // Navigate to the login page
     Navigator.pushReplacement(
       context,
