@@ -458,8 +458,11 @@ class ProductDetailsPage extends StatelessWidget {
                                           .get();
 
                                       if (userData['cardNumber'] != "") {
+                                        String purchaseSuccessMsg =
+                                            await getTranslatedString(
+                                                context, 'purchaseSuccessMsg');
                                         Fluttertoast.showToast(
-                                          msg: 'Purchase successful!',
+                                          msg: purchaseSuccessMsg,
                                           toastLength: Toast.LENGTH_SHORT,
                                           gravity: ToastGravity.BOTTOM,
                                           backgroundColor: Colors.green,

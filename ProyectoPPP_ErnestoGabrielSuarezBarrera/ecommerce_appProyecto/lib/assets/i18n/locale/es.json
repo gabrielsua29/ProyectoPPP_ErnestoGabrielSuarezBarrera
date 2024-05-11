@@ -25,7 +25,14 @@
     "totalPrice": "Precio total: ",
     "confirm": "Confirmar",
     "cancel": "Cancelar",
+    "purchaseSuccessMsg": "¡Compra completada con éxito!",
     "description": "Descripción",
     "category": "Categoría",
-    "profile": "Perfil"
+    "profileLabel": "Perfil",
+    "usernameLabel2": "Usuario",
+    "emailLabel2": "Email",
+    "birthdateLabel2": "Fecha de nacimiento",
+    "cardnumberLabel": "Tarjeta de Crédito",
+    "resetPassword": "Cambiar contraseña",
+    "signOut": "Cerrar sesión"
 }

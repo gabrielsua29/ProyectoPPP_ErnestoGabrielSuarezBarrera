@@ -101,7 +101,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   bottom: 16,
                   left: 16,
                   child: SizedBox(
-                    width: 120,
+                    width: 160,
                     height: 40,
                     child: Align(
                       alignment: Alignment.bottomLeft,
