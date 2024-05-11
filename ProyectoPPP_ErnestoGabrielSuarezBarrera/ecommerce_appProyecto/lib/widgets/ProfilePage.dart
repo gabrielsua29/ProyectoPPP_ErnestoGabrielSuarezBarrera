@@ -122,9 +122,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildProfileItem(
       {required String label, required String value, VoidCallback? onTap}) {
-    // If the label is 'Bank Card', mask the card number, otherwise, display the value as it is
-    String displayValue = label == 'Bank Card' ? _maskCardNumber(value) : value;
-
     return InkWell(
       onTap: onTap,
       child: Column(
@@ -142,7 +139,7 @@ class _ProfilePageState extends State<ProfilePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                displayValue,
+                value,
                 style: TextStyle(
                   fontSize: 16,
                 ),
@@ -154,13 +151,6 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
     );
-  }
-
-  String _maskCardNumber(String cardNumber) {
-    // Mask all characters except the last four
-    String maskedNumber = '*' * (cardNumber.length - 4) +
-        cardNumber.substring(cardNumber.length - 4);
-    return maskedNumber;
   }
 
   void _showCardDialog() {

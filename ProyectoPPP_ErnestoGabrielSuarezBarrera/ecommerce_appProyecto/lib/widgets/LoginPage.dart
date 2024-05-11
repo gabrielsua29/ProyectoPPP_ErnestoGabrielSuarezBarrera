@@ -180,7 +180,7 @@ class LoginFormState extends State<LoginForm> {
           'email': userData['email'].toString(),
           'birthdate': userData['birthDate'].toString(),
           'password': userData['password'].toString(),
-          'bankCard': "", // Add other properties as needed
+          'cardNumber': userData['cardNumber'].toString(),
         };
 
         String userDataJson = jsonEncode(userDataMap);
