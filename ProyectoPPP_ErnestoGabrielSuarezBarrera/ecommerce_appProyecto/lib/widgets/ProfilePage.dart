@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'LoginPage.dart';
@@ -91,7 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Divider(height: 30, color: Colors.grey),
                     _buildProfileItem(
                       label: 'Bank Card',
-                      value: userData['bankCard'] ?? '',
+                      value: userData['cardNumber'] ?? '',
                       onTap: _showCardDialog,
                     ),
                   ],
@@ -121,6 +122,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildProfileItem(
       {required String label, required String value, VoidCallback? onTap}) {
+    // If the label is 'Bank Card', mask the card number, otherwise, display the value as it is
+    String displayValue = label == 'Bank Card' ? _maskCardNumber(value) : value;
+
     return InkWell(
       onTap: onTap,
       child: Column(
@@ -138,7 +142,7 @@ class _ProfilePageState extends State<ProfilePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                value,
+                displayValue,
                 style: TextStyle(
                   fontSize: 16,
                 ),
@@ -152,23 +156,33 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  String _maskCardNumber(String cardNumber) {
+    // Mask all characters except the last four
+    String maskedNumber = '*' * (cardNumber.length - 4) +
+        cardNumber.substring(cardNumber.length - 4);
+    return maskedNumber;
+  }
+
   void _showCardDialog() {
     String? cardNumberError;
-    String? cardHolderNameError;
-    String? expiryDateError;
 
     TextEditingController cardNumberController = TextEditingController();
-    TextEditingController cardHolderNameController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(
-            'Add or Modify Card',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+          title: Row(
+            children: [
+              Icon(Icons.credit_card),
+              SizedBox(width: 8),
+              Text(
+                'Add or Modify Card',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
           content: SingleChildScrollView(
             child: Column(
@@ -181,61 +195,29 @@ class _ProfilePageState extends State<ProfilePage> {
                     errorText: cardNumberError,
                   ),
                 ),
-                TextField(
-                  controller: cardHolderNameController,
-                  decoration: InputDecoration(
-                    labelText: 'Cardholder Name',
-                    errorText: cardHolderNameError,
-                  ),
-                ),
-                TextField(
-                  controller: expiryDateController,
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    labelText: 'Expiry Date',
-                    errorText: expiryDateError,
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.calendar_today),
-                      onPressed: () => _selectDate(context),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
           actions: [
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 String cardNumber = cardNumberController.text.trim();
-                String cardHolderName = cardHolderNameController.text.trim();
-                String expiryDate = expiryDateController.text.trim();
 
-                setState(() {
-                  cardNumberError = cardNumber.isEmpty
-                      ? 'Please enter card number'
-                      : _isValidCardNumber(cardNumber)
-                          ? null
-                          : 'Invalid card number';
-                  cardHolderNameError = cardHolderName.isEmpty
-                      ? 'Please enter cardholder name'
-                      : null;
-                  expiryDateError =
-                      expiryDate.isEmpty ? 'Please enter expiry date' : null;
-                });
+                if (_isValidCardNumber(cardNumber)) {
+                  // Retrieve email from local storage
+                  String? userEmail = userData['email'];
 
-                if (cardNumber.isNotEmpty &&
-                    cardHolderName.isNotEmpty &&
-                    expiryDate.isNotEmpty &&
-                    _isValidCardNumber(cardNumber)) {
-                  // TODO: Save card data
+                  if (userEmail != null) {
+                    // Update card number in Firestore
+                    await _updateCardNumberInFirestore(userEmail, cardNumber);
+                  }
+
+                  // Close dialog
                   Navigator.of(context).pop();
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Please fill all fields correctly'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
+                  setState(() {
+                    cardNumberError = 'Invalid card number';
+                  });
                 }
               },
               child: Text('Save'),
@@ -250,6 +232,56 @@ class _ProfilePageState extends State<ProfilePage> {
         );
       },
     );
+  }
+
+  Future<void> _updateCardNumberInFirestore(
+      String userEmail, String cardNumber) async {
+    try {
+      // Reference to the "Usuarios" collection in Firestore
+      CollectionReference usuarios =
+          FirebaseFirestore.instance.collection('Usuarios');
+
+      // Query for the document where email matches the userEmail
+      QuerySnapshot querySnapshot =
+          await usuarios.where('email', isEqualTo: userEmail).get();
+
+      // If there is a document matching the query, update its cardNumber field
+      if (querySnapshot.docs.isNotEmpty) {
+        await querySnapshot.docs.first.reference.update({
+          'cardNumber': cardNumber,
+        });
+
+        print('Card number updated in Firestore successfully!');
+
+        setState(() {
+          userData['bankCard'] = cardNumber;
+        });
+
+        // Now update the JSON file with the new card number
+        await _updateJsonFile();
+      } else {
+        print('No document found with the email: $userEmail');
+      }
+    } catch (e) {
+      print('Error updating card number in Firestore: $e');
+    }
+  }
+
+  Future<void> _updateJsonFile() async {
+    try {
+      // Get the path to the user.json file
+      Directory appDocDir = await getApplicationDocumentsDirectory();
+      String appDocPath = appDocDir.path;
+      String filePath = '$appDocPath/user.json';
+
+      // Update the card number in the JSON file
+      userData['cardNumber'] = userData['bankCard'];
+
+      // Write the updated JSON content to the file
+      await File(filePath).writeAsString(jsonEncode(userData));
+    } catch (e) {
+      print('Error updating JSON file: $e');
+    }
   }
 
   void _selectDate(BuildContext context) async {
