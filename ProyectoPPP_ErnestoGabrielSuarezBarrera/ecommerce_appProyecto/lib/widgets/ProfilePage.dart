@@ -1,5 +1,9 @@
-import 'package:ecommerce_app/widgets/LoginPage.dart';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'LoginPage.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -9,7 +13,36 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  TextEditingController expiryDateController = TextEditingController();
+  late Map<String, dynamic> userData;
+  late TextEditingController expiryDateController;
+
+  @override
+  void initState() {
+    super.initState();
+    expiryDateController = TextEditingController();
+    // Load user data when the widget is initialized
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      // Get the path to the user.json file
+      Directory appDocDir = await getApplicationDocumentsDirectory();
+      String appDocPath = appDocDir.path;
+      String filePath = '$appDocPath/user.json';
+
+      // Read the contents of the file
+      String jsonContent = await File(filePath).readAsString();
+
+      // Parse the JSON content
+      userData = jsonDecode(jsonContent);
+
+      // Update the UI with the new data
+      setState(() {});
+    } catch (e) {
+      print('Error loading user data: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +63,22 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
               ),
-              _buildProfileItem(label: 'Username', value: 'JohnDoe123'),
-              _buildProfileItem(label: 'Email', value: 'johndoe@example.com'),
-              _buildProfileItem(label: 'Birthdate', value: 'January 1, 1990'),
+              _buildProfileItem(
+                label: 'Username',
+                value: userData['username'] ?? '',
+              ),
+              _buildProfileItem(
+                label: 'Email',
+                value: userData['email'] ?? '',
+              ),
+              _buildProfileItem(
+                label: 'Birthdate',
+                value: userData['birthdate'] ?? '',
+              ),
               Divider(height: 30, color: Colors.grey),
               _buildProfileItem(
                 label: 'Bank Card',
-                value: '**** **** **** 1234',
+                value: userData['bankCard'] ?? '',
                 onTap: _showCardDialog,
               ),
             ],
