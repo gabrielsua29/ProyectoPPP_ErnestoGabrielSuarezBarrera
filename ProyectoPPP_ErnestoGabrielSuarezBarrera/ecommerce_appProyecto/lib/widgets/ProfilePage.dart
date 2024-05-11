@@ -418,9 +418,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void _signOut() async {
     try {
-      // Clear any user session data or authentication tokens
-
-      // Delete the user.json file
       Directory appDocDir = await getApplicationDocumentsDirectory();
       String appDocPath = appDocDir.path;
       String filePath = '$appDocPath/user.json';

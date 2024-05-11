@@ -1,7 +1,12 @@
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:ecommerce_app/assets/i18n/utils/localeConfig.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ShopPage extends StatefulWidget {
   const ShopPage({Key? key}) : super(key: key);
@@ -214,6 +219,23 @@ class _ShopPageState extends State<ShopPage> {
   }
 }
 
+Future<Map<String, dynamic>?> readUserData() async {
+  Directory appDocDir = await getApplicationDocumentsDirectory();
+  String appDocPath = appDocDir.path;
+  String filePath = '$appDocPath/user.json';
+
+  try {
+    // Read the contents of the file
+    String jsonContent = await File(filePath).readAsString();
+
+    // Parse the JSON content
+    return jsonDecode(jsonContent);
+  } catch (e) {
+    print('Error reading user data: $e');
+    return null;
+  }
+}
+
 class ProductDetailsPage extends StatelessWidget {
   final Map<String, dynamic> product;
 
@@ -418,9 +440,35 @@ class ProductDetailsPage extends StatelessWidget {
                               ),
                               actions: [
                                 TextButton(
-                                  onPressed: () {
-                                    //AÑADIR COMPROBACION TARJETA
-                                    // Here you can use `quantity` for the amount
+                                  onPressed: () async {
+                                    // Read the user data from local storage
+                                    final userData = await readUserData();
+                                    print(userData);
+
+                                    if (userData != null &&
+                                        userData.containsKey('email')) {
+                                      // Retrieve the Firestore collection for Usuarios
+                                      final usuariosCollection =
+                                          FirebaseFirestore.instance
+                                              .collection('Usuarios');
+
+                                      // Retrieve the document where email matches
+                                      final userDoc = await usuariosCollection
+                                          .doc(userData['email'])
+                                          .get();
+
+                                      if (userData['cardNumber'] != "") {
+                                        Fluttertoast.showToast(
+                                          msg: 'Purchase successful!',
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.BOTTOM,
+                                          backgroundColor: Colors.green,
+                                          textColor: Colors.white,
+                                        );
+                                      }
+                                    }
+
+                                    // Close the dialog
                                     Navigator.of(context).pop();
                                   },
                                   style: ButtonStyle(
