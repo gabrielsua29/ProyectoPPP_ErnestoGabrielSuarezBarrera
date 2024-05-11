@@ -15,13 +15,22 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   late Map<String, dynamic> userData;
   late TextEditingController expiryDateController;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     expiryDateController = TextEditingController();
-    // Load user data when the widget is initialized
-    _loadUserData();
+    _loadUserDataWithDelay(); // Load user data with delay
+  }
+
+  Future<void> _loadUserDataWithDelay() async {
+    // Add a delay of 1 second before loading user data
+    await Future.delayed(Duration(seconds: 1));
+    await _loadUserData();
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> _loadUserData() async {
@@ -47,62 +56,66 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          ListView(
-            padding: EdgeInsets.all(16),
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(bottom: 8.0),
-                child: Text(
-                  'Profile',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(), // Show loading indicator
+            )
+          : Stack(
+              children: [
+                ListView(
+                  padding: EdgeInsets.all(16),
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 8.0),
+                      child: Text(
+                        'Profile',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    _buildProfileItem(
+                      label: 'Username',
+                      value: userData['username'] ?? '',
+                    ),
+                    _buildProfileItem(
+                      label: 'Email',
+                      value: userData['email'] ?? '',
+                    ),
+                    _buildProfileItem(
+                      label: 'Birthdate',
+                      value: userData['birthdate'] ?? '',
+                    ),
+                    Divider(height: 30, color: Colors.grey),
+                    _buildProfileItem(
+                      label: 'Bank Card',
+                      value: userData['bankCard'] ?? '',
+                      onTap: _showCardDialog,
+                    ),
+                  ],
+                ),
+                Positioned(
+                  bottom: 16,
+                  right: 16,
+                  child: SizedBox(
+                    width: 120,
+                    height: 40,
+                    child: ElevatedButton(
+                      onPressed: _signOut,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.withOpacity(0.5),
+                      ),
+                      child: Text(
+                        'Sign Out',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              _buildProfileItem(
-                label: 'Username',
-                value: userData['username'] ?? '',
-              ),
-              _buildProfileItem(
-                label: 'Email',
-                value: userData['email'] ?? '',
-              ),
-              _buildProfileItem(
-                label: 'Birthdate',
-                value: userData['birthdate'] ?? '',
-              ),
-              Divider(height: 30, color: Colors.grey),
-              _buildProfileItem(
-                label: 'Bank Card',
-                value: userData['bankCard'] ?? '',
-                onTap: _showCardDialog,
-              ),
-            ],
-          ),
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: SizedBox(
-              width: 120,
-              height: 40,
-              child: ElevatedButton(
-                onPressed: _signOut,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.withOpacity(0.5),
-                ),
-                child: Text(
-                  'Sign Out',
-                  style: TextStyle(fontSize: 14),
-                ),
-              ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
