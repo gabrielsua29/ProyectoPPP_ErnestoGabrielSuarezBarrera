@@ -50,6 +50,7 @@ class RegisterFormState extends State<RegisterForm> {
   late Future<String> _birthdateHint;
   late Future<String> _passwordHint;
   late Future<String> _emptyFieldError;
+  late Future<String> _emailFormatError;
 
   @override
   void initState() {
@@ -71,6 +72,7 @@ class RegisterFormState extends State<RegisterForm> {
     _birthdateHint = getTranslatedString(context, 'birthdateHint');
     _passwordHint = getTranslatedString(context, 'passwordHint');
     _emptyFieldError = getTranslatedString(context, 'emptyFieldError');
+    _emailFormatError = getTranslatedString(context, 'emailFormatError');
   }
 
   void showEmailExistsError(BuildContext context) {
@@ -203,6 +205,71 @@ class RegisterFormState extends State<RegisterForm> {
     );
   }
 
+  void showEmailFormatError(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.error,
+                      color: Colors.red,
+                      size: 24,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      "Error",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                FutureBuilder<String>(
+                  future: _emailFormatError,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else {
+                      return Text(
+                        snapshot.data ?? '',
+                        style: TextStyle(fontSize: 16),
+                        textAlign: TextAlign.center,
+                      );
+                    }
+                  },
+                ),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("OK"),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void registerUser({
     required String username,
     required String email,
@@ -210,19 +277,16 @@ class RegisterFormState extends State<RegisterForm> {
     required String password,
   }) async {
     try {
-      // Check if the email already exists
       final existingUsers = await FirebaseFirestore.instance
           .collection('Usuarios')
           .where('email', isEqualTo: email)
           .get();
 
       if (existingUsers.docs.isNotEmpty) {
-        // If the email already exists, show an error message
         showEmailExistsError(context);
-        return; // Exit the method without registering the user
+        return;
       }
 
-      // Parse the birthdate string to a DateTime object
       DateTime parsedBirthDate = DateFormat('dd/MM/yyyy').parse(birthDate);
 
       // Calculate the user's age
@@ -234,30 +298,24 @@ class RegisterFormState extends State<RegisterForm> {
         age--;
       }
 
-      // Check if the user is at least 18 years old
       if (age < 18) {
         // Show an error message
         showAgeRestrictionError(context);
-        return; // Exit the method without registering the user
+        return;
       }
 
-      // If the email doesn't exist and the user is at least 18 years old,
-      // proceed with user registration
       await FirebaseFirestore.instance.collection('Usuarios').add({
         'username': username,
         'email': email,
         'birthDate': birthDate,
         'password': password,
       });
-
-      // Show a success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('User registered successfully!'),
         ),
       );
     } catch (error) {
-      // Show an error message if something goes wrong
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to register user: $error'),
@@ -273,7 +331,7 @@ class RegisterFormState extends State<RegisterForm> {
         future: _loadTranslations(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator(); // Or another loading indicator
+            return CircularProgressIndicator();
           } else {
             return SingleChildScrollView(
               child: Column(
@@ -314,30 +372,35 @@ class RegisterFormState extends State<RegisterForm> {
                                 ),
                               ),
                               CustomRegisterInput(
-                                  labelText: _usernameLabel,
-                                  hintText: _usernameHint,
-                                  errorText: _emptyFieldError),
+                                labelText: _usernameLabel,
+                                hintText: _usernameHint,
+                                errorText: _emptyFieldError,
+                              ),
                               const SizedBox(
                                 height: 30,
                               ),
                               CustomRegisterInput(
-                                  labelText: _emailLabel,
-                                  hintText: _emailHint,
-                                  errorText: _emptyFieldError),
+                                labelText: _emailLabel,
+                                hintText: _emailHint,
+                                errorText: _emptyFieldError,
+                                validator: validateEmail,
+                              ),
                               const SizedBox(
                                 height: 30,
                               ),
                               CustomRegisterInput(
-                                  labelText: _birthdateLabel,
-                                  hintText: _birthdateHint,
-                                  errorText: _emptyFieldError),
+                                labelText: _birthdateLabel,
+                                hintText: _birthdateHint,
+                                errorText: _emptyFieldError,
+                              ),
                               const SizedBox(
                                 height: 30,
                               ),
                               CustomRegisterInput(
-                                  labelText: _passwordLabel,
-                                  hintText: _passwordHint,
-                                  errorText: _emptyFieldError),
+                                labelText: _passwordLabel,
+                                hintText: _passwordHint,
+                                errorText: _emptyFieldError,
+                              ),
                               const SizedBox(
                                 height: 30,
                               ),
@@ -433,7 +496,7 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
   @override
   void initState() {
     super.initState();
-    dateCtl = TextEditingController(); // Initialize the controller
+    dateCtl = TextEditingController();
   }
 
   @override
@@ -609,4 +672,31 @@ class CustomRegisterInputState extends State<CustomRegisterInput> {
       },
     );
   }
+}
+
+String validateEmail(String? value) {
+  if (value == null || value.isEmpty) {
+    return 'Please enter your email';
+  }
+
+  // Split the email address into local and domain parts
+  List<String> parts = value.split('@');
+  if (parts.length != 2) {
+    return 'Please enter a valid email address';
+  }
+
+  String localPart = parts[0];
+  String domainPart = parts[1];
+
+  // Check if local part contains only valid characters
+  if (localPart.isEmpty || localPart.contains(' ')) {
+    return 'Please enter a valid email address';
+  }
+
+  // Check if domain part contains at least one dot and doesn't end with dot
+  if (!domainPart.contains('.') || domainPart.endsWith('.')) {
+    return 'Please enter a valid email address';
+  }
+
+  return '';
 }

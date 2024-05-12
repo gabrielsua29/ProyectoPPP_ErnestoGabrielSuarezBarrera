@@ -91,7 +91,7 @@ class _ShopPageState extends State<ShopPage> {
         _navigateToProductDetails(context, product);
       },
       child: Container(
-        height: 250.0, // Set a fixed height for the Container
+        height: 250.0,
         child: Card(
           elevation: 3.0,
           child: Padding(
@@ -225,10 +225,8 @@ Future<Map<String, dynamic>?> readUserData() async {
   String filePath = '$appDocPath/user.json';
 
   try {
-    // Read the contents of the file
     String jsonContent = await File(filePath).readAsString();
 
-    // Parse the JSON content
     return jsonDecode(jsonContent);
   } catch (e) {
     print('Error reading user data: $e');
@@ -441,18 +439,15 @@ class ProductDetailsPage extends StatelessWidget {
                               actions: [
                                 TextButton(
                                   onPressed: () async {
-                                    // Read the user data from local storage
                                     final userData = await readUserData();
                                     print(userData);
 
                                     if (userData != null &&
                                         userData.containsKey('email')) {
-                                      // Retrieve the Firestore collection for Usuarios
                                       final usuariosCollection =
                                           FirebaseFirestore.instance
                                               .collection('Usuarios');
 
-                                      // Retrieve the document where email matches
                                       final userDoc = await usuariosCollection
                                           .doc(userData['email'])
                                           .get();
@@ -470,8 +465,6 @@ class ProductDetailsPage extends StatelessWidget {
                                         );
                                       }
                                     }
-
-                                    // Close the dialog
                                     Navigator.of(context).pop();
                                   },
                                   style: ButtonStyle(

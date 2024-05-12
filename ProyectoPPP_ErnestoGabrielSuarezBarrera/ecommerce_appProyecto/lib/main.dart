@@ -8,12 +8,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: const FirebaseOptions(
-      apiKey:
-          "AIzaSyBC95bqE7uXrTO2tpXzajLgpbxq-oM0dn8", // paste your api key here
-      appId:
-          "1:653198875001:android:03354c1877d9956a0937a8", //paste your app id here
-      messagingSenderId: "653198875001", //paste your messagingSenderId here
-      projectId: "proyectoflutter-b088e", //paste your project id here
+      apiKey: "AIzaSyBC95bqE7uXrTO2tpXzajLgpbxq-oM0dn8",
+      appId: "1:653198875001:android:03354c1877d9956a0937a8",
+      messagingSenderId: "653198875001",
+      projectId: "proyectoflutter-b088e",
     ),
   );
   bool firebaseInitialized = Firebase.apps.isNotEmpty;
@@ -37,7 +35,7 @@ class MyApp extends StatelessWidget {
         Locale('en', 'US'), // English
         Locale('es', 'ES'), // Spanish
       ],
-      locale: const Locale('es', 'ES'), // Default to Spanish
+      locale: const Locale('es', 'ES'),
       title: 'E-Commerce App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(

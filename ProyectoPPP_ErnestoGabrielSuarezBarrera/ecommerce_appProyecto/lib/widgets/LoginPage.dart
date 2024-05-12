@@ -109,13 +109,10 @@ class LoginFormState extends State<LoginForm> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Login...')),
                               );
-
-                              // Authenticate user
                               bool authenticated = await authenticateUser(
                                   usernameController.text.trim(),
                                   passwordController.text.trim());
                               if (authenticated) {
-                                // Navigate to main shop page if authentication is successful
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -123,7 +120,6 @@ class LoginFormState extends State<LoginForm> {
                                   ),
                                 );
                               } else {
-                                // Show error message if authentication fails
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text('Authentication failed.'),
@@ -161,7 +157,6 @@ class LoginFormState extends State<LoginForm> {
 
   Future<bool> authenticateUser(String username, String password) async {
     try {
-      // Query Firestore to find a user with the provided email
       QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
           .instance
           .collection('Usuarios')
@@ -169,7 +164,6 @@ class LoginFormState extends State<LoginForm> {
           .get();
 
       if (snapshot.docs.isNotEmpty) {
-        // Retrieve the user data
         Map<String, dynamic> userData = snapshot.docs.first.data();
 
         print(userData['username']);
@@ -185,36 +179,28 @@ class LoginFormState extends State<LoginForm> {
 
         String userDataJson = jsonEncode(userDataMap);
 
-        // Get the application's local directory
         Directory appDocDir = await getApplicationDocumentsDirectory();
         String appDocPath = appDocDir.path;
 
-        // Create the file path
         String filePath = path.join(appDocPath, 'user.json');
 
-        // Write the JSON data to a file
         File jsonFile = File(filePath);
         await jsonFile.writeAsString(userDataJson);
 
-        // Read the JSON data from the file
         String jsonData = await jsonFile.readAsString();
         Map<String, dynamic> readUserData = jsonDecode(jsonData);
 
         print(readUserData);
-        // Compare the passwords
+
         if (userData['password'] == password) {
-          // Authentication successful
           return true;
         } else {
-          // Incorrect password
           return false;
         }
       } else {
-        // User not found
         return false;
       }
     } catch (e) {
-      // Error occurred during authentication
       print('Authentication error: $e');
       return false;
     }
